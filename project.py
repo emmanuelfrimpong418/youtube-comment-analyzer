@@ -35,9 +35,5 @@ def fetch_comments(video_id):
     return comments
 
 
-
-
 if __name__ == "__main__":
-    vid = extract_video_id("https://youtu.be/NqXebyg7nCc?si=OOlcVF1j3yA9Jb_g")
-    result = fetch_comments(vid)
-    print(len(result))
+        pass
