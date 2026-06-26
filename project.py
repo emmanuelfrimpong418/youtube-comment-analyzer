@@ -20,12 +20,24 @@ def fetch_comments(video_id):
     comments = []
     api_key = os.environ.get("YOUTUBE_API_KEY")
     youtube = build("youtube", "v3", developerKey=api_key)
-    response = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText").execute()
+    get_comments = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText")
+    response = get_comments.execute()
     for comment in  response["items"]:
         comments.append(comment["snippet"]["topLevelComment"]["snippet"]["textDisplay"])
+    while True:
+        if response.get("nextPageToken"):
+            get_comments = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText", pageToken=response["nextPageToken"])
+            response = get_comments.execute()
+            for comment in response["items"]:
+                comments.append(comment["snippet"]["topLevelComment"]["snippet"]["textDisplay"])
+        else:
+            break
     return comments
 
 
 
+
 if __name__ == "__main__":
-    main()
+    vid = extract_video_id("https://youtu.be/NqXebyg7nCc?si=OOlcVF1j3yA9Jb_g")
+    result = fetch_comments(vid)
+    print(len(result))
