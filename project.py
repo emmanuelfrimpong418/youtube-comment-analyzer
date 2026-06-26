@@ -1,4 +1,5 @@
 import os
+import sqlite3
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 from googleapiclient.discovery import build
@@ -38,6 +39,18 @@ def fetch_comments(video_id):
         else:
             break
     return comments_data
+
+def save_comments(comments_data, video_id):
+    comment_tuples = []
+    con = sqlite3.connect("video_data.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS comments(comment, likes, author, video_id)")
+    for comment in comments_data:
+        comment_tuples.append((comment["comment"], comment["likes"], comment["author"], video_id))
+    cur.executemany("INSERT INTO comments VALUES(?, ?, ?, ?)", comment_tuples)
+    con.commit()
+    con.close()
+
 
 
 if __name__ == "__main__":
