@@ -17,23 +17,28 @@ def extract_video_id(url):
     return video_id
 
 def fetch_comments(video_id):
-    comments = []
+    comments_data = []
     api_key = os.environ.get("YOUTUBE_API_KEY")
     youtube = build("youtube", "v3", developerKey=api_key)
     get_comments = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText")
     response = get_comments.execute()
     for comment in  response["items"]:
-        comments.append(comment["snippet"]["topLevelComment"]["snippet"]["textDisplay"])
+        index = comment["snippet"]["topLevelComment"]["snippet"]
+        comments_data.append({"comment": index["textDisplay"], "likes": index["likeCount"],
+                              "author": index["authorDisplayName"]})
     while True:
         if response.get("nextPageToken"):
-            get_comments = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText", pageToken=response["nextPageToken"])
+            get_comments = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText",
+                                                         pageToken=response["nextPageToken"])
             response = get_comments.execute()
             for comment in response["items"]:
-                comments.append(comment["snippet"]["topLevelComment"]["snippet"]["textDisplay"])
+                index = comment["snippet"]["topLevelComment"]["snippet"]
+                comments_data.append({"comment": index["textDisplay"], "likes": index["likeCount"],
+                                      "author": index["authorDisplayName"]})
         else:
             break
-    return comments
+    return comments_data
 
 
 if __name__ == "__main__":
-        pass
+    pass
