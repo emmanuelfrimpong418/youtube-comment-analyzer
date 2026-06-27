@@ -51,6 +51,15 @@ def save_comments(comments_data, video_id):
     con.commit()
     con.close()
 
+def search_comments(keyword):
+    con = sqlite3.connect("video_data.db")
+    cur = con.cursor()
+    search_term = f"%{keyword}%"
+    res = cur.execute("SELECT comment, likes, author FROM comments WHERE comment LIKE ?", (search_term,))
+    results = res.fetchall()
+    con.close()
+    return results
+
 
 
 if __name__ == "__main__":
