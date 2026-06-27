@@ -51,11 +51,21 @@ def save_comments(comments_data, video_id):
     con.commit()
     con.close()
 
-def search_comments(keyword):
+def search_comments(keyword, video_id):
     con = sqlite3.connect("video_data.db")
     cur = con.cursor()
     search_term = f"%{keyword}%"
-    res = cur.execute("SELECT comment, likes, author FROM comments WHERE comment LIKE ?", (search_term,))
+    res = cur.execute("SELECT comment, likes, author FROM comments WHERE comment LIKE ? AND video_id = ?",
+                      (search_term, video_id))
+    results = res.fetchall()
+    con.close()
+    return results
+
+def top_comments(limit, video_id):
+    con = sqlite3.connect("video_data.db")
+    cur = con.cursor()
+    res = cur.execute("SELECT comment, likes, author FROM comments WHERE video_id = ? "
+                      "ORDER BY likes DESC LIMIT ?",(video_id, limit))
     results = res.fetchall()
     con.close()
     return results
