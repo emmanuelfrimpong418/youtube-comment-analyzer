@@ -129,6 +129,21 @@ def word_frequency(video_id):
     sorted_words = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
     return dict(sorted_words)
 
+def display_comments(comments):
+    header_text = f"COMMENTS RESULTS ({len(comments)} FOUND)"
+    borders = "=" * 103
+    print(borders)
+    print(header_text.center(103))
+    print(borders)
+    for index, comment_data in enumerate(comments, 1):
+        comment, likes, author = comment_data
+        if likes == 1:
+            print(f"{index}. {author} ({likes} like)")
+            print(f'"{comment}"')
+        else:
+            print(f"{index}. {author} ({likes} likes)")
+            print(f'"{comment}"')
+    print(borders)
 
 
 if __name__ == "__main__":
