@@ -129,6 +129,14 @@ def word_frequency(limit, video_id):
     sorted_words = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
     return dict(sorted_words[:limit])
 
+def get_last_video_id():
+    con = sqlite3.connect("video_data.db")
+    cur = con.cursor()
+    res = cur.execute("SELECT video_id FROM comments ORDER BY rowid DESC LIMIT 1")
+    result = res.fetchone()
+    con.close()
+    return result[0] if result else None
+
 def display_comments(comments):
     header_text = f"COMMENTS RESULTS ({len(comments)} FOUND)"
     borders = "=" * 103
