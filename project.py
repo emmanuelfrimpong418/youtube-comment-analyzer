@@ -113,7 +113,7 @@ def top_comments(limit, video_id):
     con.close()
     return results
 
-def word_frequency(video_id):
+def word_frequency(limit, video_id):
     con = sqlite3.connect("video_data.db")
     cur = con.cursor()
     res = cur.execute("SELECT comment FROM comments WHERE video_id = ?", (video_id,))
@@ -127,7 +127,7 @@ def word_frequency(video_id):
                 word_count[word] = word_count.get(word, 0) + 1
     con.close()
     sorted_words = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
-    return dict(sorted_words)
+    return dict(sorted_words[:limit])
 
 def display_comments(comments):
     header_text = f"COMMENTS RESULTS ({len(comments)} FOUND)"
@@ -144,6 +144,18 @@ def display_comments(comments):
             print(f"{index}. {author} ({likes} likes)")
             print(f'"{comment}"')
     print(borders)
+
+def display_frequency(freq_data):
+    header_text = f"WORD FREQUENCY (TOP {len(freq_data)} FOUND)"
+    borders = "=" * 103
+    print(borders)
+    print(header_text.center(103))
+    print(borders)
+    for index, word_data in enumerate(freq_data.items(), 1):
+        word, frequency = word_data
+        print(f"{index}. {word:<20}{frequency:>5}")
+    print(borders)
+
 
 
 if __name__ == "__main__":
