@@ -29,7 +29,7 @@ def main():
             save_comments(comments_data, video_id)
             print(f"Fetched and saved {len(comments_data)} comments for video {video_id}.")
         except KeyError:
-            sys.exit("Invalid url")
+            sys.exit("Invalid url!")
     else:
         try:
             if args.command == "search":
@@ -77,6 +77,7 @@ def save_comments(comments_data, video_id):
     con = sqlite3.connect("video_data.db")
     cur = con.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS comments(comment, likes, author, video_id)")
+    cur.execute("DELETE FROM comments WHERE video_id = ?", (video_id,))
     for comment in comments_data:
         comment_tuples.append((comment["comment"], comment["likes"], comment["author"], video_id))
     cur.executemany("INSERT INTO comments VALUES(?, ?, ?, ?)", comment_tuples)
