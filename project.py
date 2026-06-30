@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import string
+import argparse
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 from googleapiclient.discovery import build
@@ -9,7 +10,17 @@ from constants import STOP_WORDS, YOUTUBE_NOISE_WORDS, CONTRACTIONS
 load_dotenv()
 
 def main():
-    pass
+    parser = argparse.ArgumentParser(description="Analyze YouTube video comments")
+    subparsers = parser.add_subparsers(title="commands")
+    parser_fetch = subparsers.add_parser("fetch", help="Fetch comments from a YouTube video")
+    parser_fetch.add_argument("url", help="YouTube video URL to fetch comments from")
+    parser_search = subparsers.add_parser("search", help="Search comments for a keyword")
+    parser_search.add_argument("keyword", help="Keyword to search for in comments")
+    parser_top = subparsers.add_parser("top", help="Display top comments by likes")
+    parser_top.add_argument("limit", type=int, help="Number of top comments to display")
+    parser_freq = subparsers.add_parser("freq", help="Display most frequent words in comments")
+    parser_freq.add_argument("limit", type=int, help="Number of most frequent words to display")
+    args = parser.parse_args()
 
 def extract_video_id(url):
     result = urlparse(url)
