@@ -11,7 +11,7 @@ load_dotenv()
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze YouTube video comments")
-    subparsers = parser.add_subparsers(title="commands")
+    subparsers = parser.add_subparsers(title="commands", dest="command")
     parser_fetch = subparsers.add_parser("fetch", help="Fetch comments from a YouTube video")
     parser_fetch.add_argument("url", help="YouTube video URL to fetch comments from")
     parser_search = subparsers.add_parser("search", help="Search comments for a keyword")
@@ -21,6 +21,18 @@ def main():
     parser_freq = subparsers.add_parser("freq", help="Display most frequent words in comments")
     parser_freq.add_argument("limit", type=int, help="Number of most frequent words to display")
     args = parser.parse_args()
+    if args.command == "fetch":
+        video_id = extract_video_id(args.url)
+        comments_data = fetch_comments(video_id)
+        save_comments(comments_data, video_id)
+        print(f"Fetched and saved {len(comments_data)} comments for video {video_id}.")
+    elif args.command == "search":
+        display_comments(search_comments(args.keyword, get_last_video_id()))
+    elif args.command == "top":
+        display_comments(top_comments(args.limit, get_last_video_id()))
+    elif args.command == "freq":
+        display_frequency(word_frequency(args.limit, get_last_video_id()))
+
 
 def extract_video_id(url):
     result = urlparse(url)
@@ -137,4 +149,4 @@ def display_frequency(freq_data):
 
 
 if __name__ == "__main__":
-    pass
+    main()
