@@ -23,10 +23,13 @@ def main():
     parser_freq.add_argument("limit", type=int, help="Number of most frequent words to display")
     args = parser.parse_args()
     if args.command == "fetch":
-        video_id = extract_video_id(args.url)
-        comments_data = fetch_comments(video_id)
-        save_comments(comments_data, video_id)
-        print(f"Fetched and saved {len(comments_data)} comments for video {video_id}.")
+        try:
+            video_id = extract_video_id(args.url)
+            comments_data = fetch_comments(video_id)
+            save_comments(comments_data, video_id)
+            print(f"Fetched and saved {len(comments_data)} comments for video {video_id}.")
+        except KeyError:
+            sys.exit("Invalid url")
     else:
         try:
             if args.command == "search":
@@ -36,8 +39,7 @@ def main():
             elif args.command == "freq":
                 display_frequency(word_frequency(args.limit, get_last_video_id()))
         except sqlite3.OperationalError:
-            print("You need to call fetch first!")
-            sys.exit(1)
+            sys.exit("You need to call fetch first!")
 
 def extract_video_id(url):
     result = urlparse(url)
