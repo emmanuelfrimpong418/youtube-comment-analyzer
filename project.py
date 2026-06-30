@@ -22,6 +22,9 @@ def main():
     parser_freq = subparsers.add_parser("freq", help="Display most frequent words in comments")
     parser_freq.add_argument("limit", type=int, help="Number of most frequent words to display")
     args = parser.parse_args()
+    if args.command is None:
+        parser.print_help()
+        sys.exit(1)
     if args.command == "fetch":
         try:
             video_id = extract_video_id(args.url)
