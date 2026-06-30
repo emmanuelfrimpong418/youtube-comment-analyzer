@@ -2,6 +2,7 @@ import os
 import sqlite3
 import string
 import argparse
+import sys
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 from googleapiclient.discovery import build
@@ -26,13 +27,17 @@ def main():
         comments_data = fetch_comments(video_id)
         save_comments(comments_data, video_id)
         print(f"Fetched and saved {len(comments_data)} comments for video {video_id}.")
-    elif args.command == "search":
-        display_comments(search_comments(args.keyword, get_last_video_id()))
-    elif args.command == "top":
-        display_comments(top_comments(args.limit, get_last_video_id()))
-    elif args.command == "freq":
-        display_frequency(word_frequency(args.limit, get_last_video_id()))
-
+    else:
+        try:
+            if args.command == "search":
+                display_comments(search_comments(args.keyword, get_last_video_id()))
+            elif args.command == "top":
+                display_comments(top_comments(args.limit, get_last_video_id()))
+            elif args.command == "freq":
+                display_frequency(word_frequency(args.limit, get_last_video_id()))
+        except sqlite3.OperationalError:
+            print("You need to call fetch first!")
+            sys.exit(1)
 
 def extract_video_id(url):
     result = urlparse(url)
