@@ -31,7 +31,7 @@ def main():
             comments_data = fetch_comments(video_id)
             save_comments(comments_data, video_id)
             print(f"Fetched and saved {len(comments_data)} comments for video {video_id}.")
-        except KeyError:
+        except ValueError:
             sys.exit("Invalid url!")
     else:
         try:
@@ -45,11 +45,15 @@ def main():
             sys.exit("You need to call fetch first!")
 
 def extract_video_id(url):
+    if not url:
+        raise ValueError("Invalid url!")
     result = urlparse(url)
     if "youtu.be" in result.netloc:
         video_id = result.path.lstrip("/")
     else:
-        video_id = parse_qs(result.query)["v"][0]
+        video_id = parse_qs(result.query).get("v", [""])[0]
+    if not video_id:
+        raise ValueError("Invalid url!")
     return video_id
 
 def fetch_comments(video_id):
