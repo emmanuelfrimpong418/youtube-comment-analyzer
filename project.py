@@ -6,9 +6,15 @@ import sys
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
 from constants import STOP_WORDS, YOUTUBE_NOISE_WORDS, CONTRACTIONS
 
 load_dotenv()
+
+class CommentsFetchError(Exception):
+    """Raised when comments cannot be fetched from the YouTube API."""
+    pass
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze YouTube video comments")
@@ -33,6 +39,8 @@ def main():
             print(f"Fetched and saved {len(comments_data)} comments for video {video_id}.")
         except ValueError:
             sys.exit("Invalid url!")
+        except CommentsFetchError as e:
+            sys.exit(str(e))
     else:
         try:
             if args.command == "search":
@@ -60,23 +68,36 @@ def fetch_comments(video_id):
     comments_data = []
     api_key = os.environ.get("YOUTUBE_API_KEY")
     youtube = build("youtube", "v3", developerKey=api_key)
-    get_comments = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText")
-    response = get_comments.execute()
-    for comment in  response["items"]:
-        index = comment["snippet"]["topLevelComment"]["snippet"]
-        comments_data.append({"comment": index["textDisplay"], "likes": index["likeCount"],
-                              "author": index["authorDisplayName"]})
-    while True:
-        if response.get("nextPageToken"):
-            get_comments = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText",
-                                                         pageToken=response["nextPageToken"])
-            response = get_comments.execute()
-            for comment in response["items"]:
-                index = comment["snippet"]["topLevelComment"]["snippet"]
-                comments_data.append({"comment": index["textDisplay"], "likes": index["likeCount"],
-                                      "author": index["authorDisplayName"]})
+    try:
+        get_comments = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText")
+        response = get_comments.execute()
+        for comment in  response["items"]:
+            index = comment["snippet"]["topLevelComment"]["snippet"]
+            comments_data.append({"comment": index["textDisplay"], "likes": index["likeCount"],
+                                  "author": index["authorDisplayName"]})
+        while True:
+            if response.get("nextPageToken"):
+                get_comments = youtube.commentThreads().list(part="snippet", videoId=video_id, textFormat="plainText",
+                                                             pageToken=response["nextPageToken"])
+                response = get_comments.execute()
+                for comment in response["items"]:
+                    index = comment["snippet"]["topLevelComment"]["snippet"]
+                    comments_data.append({"comment": index["textDisplay"], "likes": index["likeCount"],
+                                          "author": index["authorDisplayName"]})
+            else:
+                break
+    except HttpError as error:
+        reason = error.error_details[0]["reason"] if error.error_details else ""
+        if reason == "badRequest":
+            raise CommentsFetchError("Invalid API key. Check your .env file.")
+        elif reason == "videoNotFound":
+            raise CommentsFetchError("Video not found. Check the URL.")
+        elif reason == "commentsDisabled":
+            raise CommentsFetchError("Comments are disabled for this video.")
+        elif reason == "quotaExceeded":
+            raise CommentsFetchError("YouTube API quota exceeded. Try again later.")
         else:
-            break
+            raise CommentsFetchError("Could not fetch comments from YouTube.")
     return comments_data
 
 def save_comments(comments_data, video_id):
