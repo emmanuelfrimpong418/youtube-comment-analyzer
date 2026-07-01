@@ -81,40 +81,36 @@ def fetch_comments(video_id):
 
 def save_comments(comments_data, video_id):
     comment_tuples = []
-    con = sqlite3.connect("video_data.db")
-    cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS comments(comment, likes, author, video_id)")
-    cur.execute("DELETE FROM comments WHERE video_id = ?", (video_id,))
-    for comment in comments_data:
-        comment_tuples.append((comment["comment"], comment["likes"], comment["author"], video_id))
-    cur.executemany("INSERT INTO comments VALUES(?, ?, ?, ?)", comment_tuples)
-    con.commit()
-    con.close()
+    with sqlite3.connect("video_data.db") as con:
+        cur = con.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS comments(comment TEXT, likes INTEGER, author TEXT, video_id TEXT)")
+        cur.execute("DELETE FROM comments WHERE video_id = ?", (video_id,))
+        for comment in comments_data:
+            comment_tuples.append((comment["comment"], comment["likes"], comment["author"], video_id))
+        cur.executemany("INSERT INTO comments VALUES(?, ?, ?, ?)", comment_tuples)
 
 def search_comments(keyword, video_id):
-    con = sqlite3.connect("video_data.db")
-    cur = con.cursor()
-    search_term = f"%{keyword}%"
-    res = cur.execute("SELECT comment, likes, author FROM comments WHERE comment LIKE ? AND video_id = ?",
-                      (search_term, video_id))
-    results = res.fetchall()
-    con.close()
+    with sqlite3.connect("video_data.db") as con:
+        cur = con.cursor()
+        search_term = f"%{keyword}%"
+        res = cur.execute("SELECT comment, likes, author FROM comments WHERE comment LIKE ? AND video_id = ?",
+                          (search_term, video_id))
+        results = res.fetchall()
     return results
 
 def top_comments(limit, video_id):
-    con = sqlite3.connect("video_data.db")
-    cur = con.cursor()
-    res = cur.execute("SELECT comment, likes, author FROM comments WHERE video_id = ? "
-                      "ORDER BY likes DESC LIMIT ?",(video_id, limit))
-    results = res.fetchall()
-    con.close()
+    with sqlite3.connect("video_data.db") as con:
+        cur = con.cursor()
+        res = cur.execute("SELECT comment, likes, author FROM comments WHERE video_id = ? "
+                          "ORDER BY likes DESC LIMIT ?",(video_id, limit))
+        results = res.fetchall()
     return results
 
 def word_frequency(limit, video_id):
-    con = sqlite3.connect("video_data.db")
-    cur = con.cursor()
-    res = cur.execute("SELECT comment FROM comments WHERE video_id = ?", (video_id,))
-    results = res.fetchall()
+    with sqlite3.connect("video_data.db") as con:
+        cur = con.cursor()
+        res = cur.execute("SELECT comment FROM comments WHERE video_id = ?", (video_id,))
+        results = res.fetchall()
     word_count = {}
     for result in results:
         for word in result[0].split():
@@ -122,16 +118,14 @@ def word_frequency(limit, video_id):
             if (word not in STOP_WORDS and word not in YOUTUBE_NOISE_WORDS and word not in CONTRACTIONS
                     and any(char.isalpha() for char in word)):
                 word_count[word] = word_count.get(word, 0) + 1
-    con.close()
     sorted_words = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
     return dict(sorted_words[:limit])
 
 def get_last_video_id():
-    con = sqlite3.connect("video_data.db")
-    cur = con.cursor()
-    res = cur.execute("SELECT video_id FROM comments ORDER BY rowid DESC LIMIT 1")
-    result = res.fetchone()
-    con.close()
+    with sqlite3.connect("video_data.db") as con:
+        cur = con.cursor()
+        res = cur.execute("SELECT video_id FROM comments ORDER BY rowid DESC LIMIT 1")
+        result = res.fetchone()
     return result[0] if result else None
 
 def display_comments(comments):
