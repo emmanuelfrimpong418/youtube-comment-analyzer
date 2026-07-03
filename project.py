@@ -206,13 +206,16 @@ def display_stats(stats_data):
     print(f"Comments analyzed: {stats_data['comments_analyzed']:,}")
     print(f"Total likes: {stats_data['total_likes']:,}")
     print(f"Average likes per comment: {stats_data['average_likes']:.1f}")
-    print(f"Average comment length: {stats_data['average_comment_length']:.1f}")
+    print(f"Average comment length: {stats_data['average_comment_length']:.1f} words per comment")
+    print()
     print("Most liked comment:")
     print(f"Author: {author}")
     print(f"Likes: {likes:,}")
-    print(f"Comment: {comment}")
+    print(f'"{comment}"')
+    print(borders)
 
 
 
 if __name__ == "__main__":
-    main()
+    video_id = extract_video_id("https://www.youtube.com/watch?v=SoH6RKbhwy8")
+    display_stats(compute_stats(video_id))
