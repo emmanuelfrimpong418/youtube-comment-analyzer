@@ -217,5 +217,4 @@ def display_stats(stats_data):
 
 
 if __name__ == "__main__":
-    video_id = extract_video_id("https://www.youtube.com/watch?v=SoH6RKbhwy8")
-    display_stats(compute_stats(video_id))
+    main()
