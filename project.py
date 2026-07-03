@@ -196,6 +196,22 @@ def display_frequency(freq_data):
         print(f"{index}. {word:<20}{frequency:>5}")
     print(borders)
 
+def display_stats(stats_data):
+    header_text = "GENERAL STATISTICS"
+    borders = "=" * 103
+    comment, likes, author = stats_data["most_liked_comment"]
+    print(borders)
+    print(header_text.center(103))
+    print(borders)
+    print(f"Comments analyzed: {stats_data['comments_analyzed']:,}")
+    print(f"Total likes: {stats_data['total_likes']:,}")
+    print(f"Average likes per comment: {stats_data['average_likes']:.1f}")
+    print(f"Average comment length: {stats_data['average_comment_length']:.1f}")
+    print("Most liked comment:")
+    print(f"Author: {author}")
+    print(f"Likes: {likes:,}")
+    print(f"Comment: {comment}")
+
 
 
 if __name__ == "__main__":
