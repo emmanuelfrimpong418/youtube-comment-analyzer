@@ -142,6 +142,26 @@ def word_frequency(limit, video_id):
     sorted_words = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
     return dict(sorted_words[:limit])
 
+def compute_stats(video_id):
+    with sqlite3.connect("video_data.db") as con:
+        cur = con.cursor()
+        res = cur.execute("SELECT comment, likes, author FROM comments WHERE video_id = ? ORDER BY likes DESC",
+                          (video_id,))
+        results = res.fetchall()
+    if not results:
+        raise ValueError("No comments found!")
+    comments_analyzed = len(results)
+    most_liked_comment = results[0]
+    total_likes = 0
+    total_comment_length = 0
+    for result in results:
+        total_likes += result[1]
+        total_comment_length += len(result[0].split())
+    average_likes = total_likes/comments_analyzed
+    average_comment_length = total_comment_length / comments_analyzed
+    return {"comments_analyzed": comments_analyzed, "total_likes": total_likes, "average_likes": average_likes,
+            "average_comment_length": average_comment_length, "most_liked_comment": most_liked_comment}
+
 def get_last_video_id():
     with sqlite3.connect("video_data.db") as con:
         cur = con.cursor()
