@@ -54,6 +54,8 @@ def main():
                 display_stats(compute_stats(get_last_video_id()))
         except sqlite3.OperationalError:
             sys.exit("You need to call fetch first!")
+        except ValueError as e:
+            sys.exit(str(e))
 
 def extract_video_id(url):
     if not url:
@@ -173,6 +175,9 @@ def get_last_video_id():
     return result[0] if result else None
 
 def display_comments(comments):
+    if not comments:
+        print("No matching comments found!")
+        return
     header_text = f"COMMENTS RESULTS ({len(comments)} FOUND)"
     borders = "=" * 103
     print(borders)
@@ -189,6 +194,9 @@ def display_comments(comments):
     print(borders)
 
 def display_frequency(freq_data):
+    if not freq_data:
+        print("No words found!")
+        return
     header_text = f"WORD FREQUENCY (TOP {len(freq_data)} FOUND)"
     borders = "=" * 103
     print(borders)
