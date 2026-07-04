@@ -39,8 +39,8 @@ def main():
             comments_data = fetch_comments(video_id)
             save_comments(comments_data, video_id)
             print(f"Fetched and saved {len(comments_data)} comments for video {video_id}.")
-        except ValueError:
-            sys.exit("Invalid url!")
+        except ValueError as e:
+            sys.exit(str(e))
         except CommentsFetchError as e:
             sys.exit(str(e))
     else:
@@ -106,9 +106,9 @@ def fetch_comments(video_id):
             raise CommentsFetchError("Could not fetch comments from YouTube.")
     return comments_data
 
-def save_comments(comments_data, video_id):
+def save_comments(comments_data, video_id, db_path="video_data.db"):
     comment_tuples = []
-    with sqlite3.connect("video_data.db") as con:
+    with sqlite3.connect(db_path) as con:
         cur = con.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS comments(comment TEXT, likes INTEGER, author TEXT, video_id TEXT)")
         cur.execute("DELETE FROM comments WHERE video_id = ?", (video_id,))
@@ -116,8 +116,8 @@ def save_comments(comments_data, video_id):
             comment_tuples.append((comment["comment"], comment["likes"], comment["author"], video_id))
         cur.executemany("INSERT INTO comments VALUES(?, ?, ?, ?)", comment_tuples)
 
-def search_comments(keyword, video_id):
-    with sqlite3.connect("video_data.db") as con:
+def search_comments(keyword, video_id, db_path="video_data.db"):
+    with sqlite3.connect(db_path) as con:
         cur = con.cursor()
         search_term = f"%{keyword}%"
         res = cur.execute("SELECT comment, likes, author FROM comments WHERE comment LIKE ? AND video_id = ?",
@@ -125,16 +125,16 @@ def search_comments(keyword, video_id):
         results = res.fetchall()
     return results
 
-def top_comments(limit, video_id):
-    with sqlite3.connect("video_data.db") as con:
+def top_comments(limit, video_id, db_path="video_data.db"):
+    with sqlite3.connect(db_path) as con:
         cur = con.cursor()
         res = cur.execute("SELECT comment, likes, author FROM comments WHERE video_id = ? "
                           "ORDER BY likes DESC LIMIT ?",(video_id, limit))
         results = res.fetchall()
     return results
 
-def word_frequency(limit, video_id):
-    with sqlite3.connect("video_data.db") as con:
+def word_frequency(limit, video_id, db_path="video_data.db"):
+    with sqlite3.connect(db_path) as con:
         cur = con.cursor()
         res = cur.execute("SELECT comment FROM comments WHERE video_id = ?", (video_id,))
         results = res.fetchall()
@@ -148,8 +148,8 @@ def word_frequency(limit, video_id):
     sorted_words = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
     return dict(sorted_words[:limit])
 
-def compute_stats(video_id):
-    with sqlite3.connect("video_data.db") as con:
+def compute_stats(video_id, db_path="video_data.db"):
+    with sqlite3.connect(db_path) as con:
         cur = con.cursor()
         res = cur.execute("SELECT comment, likes, author FROM comments WHERE video_id = ? ORDER BY likes DESC",
                           (video_id,))
@@ -168,8 +168,8 @@ def compute_stats(video_id):
     return {"comments_analyzed": comments_analyzed, "total_likes": total_likes, "average_likes": average_likes,
             "average_comment_length": average_comment_length, "most_liked_comment": most_liked_comment}
 
-def get_last_video_id():
-    with sqlite3.connect("video_data.db") as con:
+def get_last_video_id(db_path="video_data.db"):
+    with sqlite3.connect(db_path) as con:
         cur = con.cursor()
         res = cur.execute("SELECT video_id FROM comments ORDER BY rowid DESC LIMIT 1")
         result = res.fetchone()
