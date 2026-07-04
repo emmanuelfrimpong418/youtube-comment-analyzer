@@ -17,7 +17,8 @@ class CommentsFetchError(Exception):
     pass
 
 def main():
-    parser = argparse.ArgumentParser(description="Analyze YouTube video comments")
+    parser = argparse.ArgumentParser(description="Analyze YouTube video comments. Run 'fetch <url>' first, then use "
+                                                 "search/top/freq/stats.")
     subparsers = parser.add_subparsers(title="commands", dest="command")
     parser_fetch = subparsers.add_parser("fetch", help="Fetch comments from a YouTube video")
     parser_fetch.add_argument("url", help="YouTube video URL to fetch comments from")
