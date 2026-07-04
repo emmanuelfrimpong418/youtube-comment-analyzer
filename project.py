@@ -27,6 +27,7 @@ def main():
     parser_top.add_argument("limit", type=int, help="Number of top comments to display")
     parser_freq = subparsers.add_parser("freq", help="Display most frequent words in comments")
     parser_freq.add_argument("limit", type=int, help="Number of most frequent words to display")
+    parser_stat = subparsers.add_parser("stats", help="Display general statistics about comments")
     args = parser.parse_args()
     if args.command is None:
         parser.print_help()
@@ -49,6 +50,8 @@ def main():
                 display_comments(top_comments(args.limit, get_last_video_id()))
             elif args.command == "freq":
                 display_frequency(word_frequency(args.limit, get_last_video_id()))
+            elif args.command == "stats":
+                display_stats(compute_stats(get_last_video_id()))
         except sqlite3.OperationalError:
             sys.exit("You need to call fetch first!")
 
