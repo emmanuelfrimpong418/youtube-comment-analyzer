@@ -189,9 +189,11 @@ def display_comments(comments):
         if likes == 1:
             print(f"{index}. {author} ({likes} like)")
             print(f'"{comment}"')
+            print()
         else:
             print(f"{index}. {author} ({likes} likes)")
             print(f'"{comment}"')
+            print()
     print(borders)
 
 def display_frequency(freq_data):
