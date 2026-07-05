@@ -1,5 +1,13 @@
 import pytest
-from project import extract_video_id
+from project import extract_video_id, save_comments, search_comments
+
+FAKE_COMMENTS = [
+    {"comment": "great tutorial. wonderful", "likes": 5, "author": "Alice"},
+    {"comment": "this helped me a lot. this is wonderful", "likes": 10, "author": "Bob"},
+    {"comment": "great explanation, very clear", "likes": 2, "author": "Charlie"},
+    {"comment": "not helpful at all", "likes": 0, "author": "Dana"},
+]
+FAKE_VIDEO_ID = "SaH6RKbhwy8"
 
 def test_extract_video_id_valid():
     assert extract_video_id("https://youtu.be/8qQW4LTWgtc?si=CYSuulbV1hK6BpeS") == "8qQW4LTWgtc"
@@ -17,3 +25,39 @@ def test_extract_video_id_invalid():
         extract_video_id("https://youtu.be/")
     with pytest.raises(ValueError):
         extract_video_id("https://www.youtube.com/")
+
+def test_search_comments_valid(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_COMMENTS, FAKE_VIDEO_ID, db_path=db_path)
+    result1 = search_comments("great", FAKE_VIDEO_ID, db_path=db_path)
+    assert result1 == [
+        ("great tutorial. wonderful", 5, "Alice"),
+        ("great explanation, very clear", 2, "Charlie")
+    ]
+    result2 = search_comments("wonderful", FAKE_VIDEO_ID, db_path=db_path)
+    assert result2 == [
+        ("great tutorial. wonderful", 5, "Alice"),
+        ("this helped me a lot. this is wonderful", 10, "Bob")
+    ]
+    result3 = search_comments("HELPFUL", FAKE_VIDEO_ID, db_path=db_path)
+    assert result3 == [("not helpful at all", 0, "Dana")]
+
+def test_search_comments_invalid(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_COMMENTS, FAKE_VIDEO_ID, db_path=db_path)
+    result1 = search_comments("goat", FAKE_VIDEO_ID, db_path=db_path)
+    assert result1 == []
+
+def test_search_comments_video_isolation(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_COMMENTS, FAKE_VIDEO_ID, db_path=db_path)
+    save_comments(
+        [{"comment": "great video too", "likes": 3, "author": "Eve"}],
+        "some_other_video_id",
+        db_path=db_path
+    )
+    result = search_comments("great", FAKE_VIDEO_ID, db_path=db_path)
+    assert result == [
+        ("great tutorial. wonderful", 5, "Alice"),
+        ("great explanation, very clear", 2, "Charlie")
+    ]
