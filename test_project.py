@@ -1,11 +1,13 @@
 import pytest
-from project import extract_video_id, save_comments, search_comments
+from project import extract_video_id, save_comments, search_comments, top_comments
 
 FAKE_COMMENTS = [
     {"comment": "great tutorial. wonderful", "likes": 5, "author": "Alice"},
     {"comment": "this helped me a lot. this is wonderful", "likes": 10, "author": "Bob"},
     {"comment": "great explanation, very clear", "likes": 2, "author": "Charlie"},
     {"comment": "not helpful at all", "likes": 0, "author": "Dana"},
+    {"comment": "awesome man", "likes": 5, "author": "Daniel"},
+    {"comment": "superb", "likes": 5, "author": "Samuel"}
 ]
 FAKE_VIDEO_ID = "SaH6RKbhwy8"
 
@@ -60,4 +62,19 @@ def test_search_comments_video_isolation(tmp_path):
     assert result == [
         ("great tutorial. wonderful", 5, "Alice"),
         ("great explanation, very clear", 2, "Charlie")
+    ]
+
+def test_top_comments_valid(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_COMMENTS, FAKE_VIDEO_ID, db_path=db_path)
+    result1 = top_comments(1, FAKE_VIDEO_ID, db_path=db_path)
+    assert result1 == [("this helped me a lot. this is wonderful", 10, "Bob")]
+    result2 = top_comments(3, FAKE_VIDEO_ID, db_path=db_path)
+    assert result2 == [("this helped me a lot. this is wonderful", 10, "Bob"), ("great tutorial. wonderful",  5,
+        "Alice"), ("awesome man",  5, "Daniel")
+    ]
+    result3 = top_comments(100, FAKE_VIDEO_ID, db_path=db_path)
+    assert result3 == [("this helped me a lot. this is wonderful", 10, "Bob"), ("great tutorial. wonderful",  5,
+        "Alice"), ("awesome man",  5, "Daniel"), ("superb", 5, "Samuel"), ("great explanation, very clear", 2,
+        "Charlie"), ("not helpful at all", 0, "Dana")
     ]
