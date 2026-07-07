@@ -86,4 +86,14 @@ def test_top_comments_invalid(tmp_path):
         top_comments(-5, FAKE_VIDEO_ID, db_path=db_path)
     with pytest.raises(ValueError):
         top_comments(0, FAKE_VIDEO_ID, db_path=db_path)
-    
+
+def test_top_comments_video_isolation(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_COMMENTS, FAKE_VIDEO_ID, db_path=db_path)
+    save_comments(
+        [{"comment": "great video too", "likes": 20, "author": "Eve"}],
+        "some_other_video_id",
+        db_path=db_path
+    )
+    result = top_comments(1, FAKE_VIDEO_ID, db_path=db_path)
+    assert result == [("this helped me a lot. this is wonderful", 10, "Bob")]
