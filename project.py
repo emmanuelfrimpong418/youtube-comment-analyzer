@@ -129,7 +129,7 @@ def top_comments(limit, video_id, db_path="video_data.db"):
     with sqlite3.connect(db_path) as con:
         cur = con.cursor()
         res = cur.execute("SELECT comment, likes, author FROM comments WHERE video_id = ? "
-                          "ORDER BY likes DESC LIMIT ?",(video_id, limit))
+                          "ORDER BY likes DESC, rowid ASC LIMIT ?",(video_id, limit))
         results = res.fetchall()
     return results
 
