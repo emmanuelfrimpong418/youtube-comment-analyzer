@@ -78,3 +78,12 @@ def test_top_comments_valid(tmp_path):
         "Alice"), ("awesome man",  5, "Daniel"), ("superb", 5, "Samuel"), ("great explanation, very clear", 2,
         "Charlie"), ("not helpful at all", 0, "Dana")
     ]
+
+def test_top_comments_invalid(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_COMMENTS, FAKE_VIDEO_ID, db_path=db_path)
+    with pytest.raises(ValueError):
+        top_comments(-5, FAKE_VIDEO_ID, db_path=db_path)
+    with pytest.raises(ValueError):
+        top_comments(0, FAKE_VIDEO_ID, db_path=db_path)
+    
