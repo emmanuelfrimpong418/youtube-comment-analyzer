@@ -3,6 +3,7 @@ import sqlite3
 import string
 import argparse
 import sys
+import heapq
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 from googleapiclient.discovery import build
@@ -151,8 +152,8 @@ def word_frequency(limit, video_id, db_path="video_data.db"):
                 word_count[word] = word_count.get(word, 0) + 1
     if not word_count:
         raise ValueError("No words found!")
-    sorted_words = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
-    return dict(sorted_words[:limit])
+    sorted_words = heapq.nlargest(limit, word_count.items(), key=lambda pair: pair[1])
+    return dict(sorted_words)
 
 def compute_stats(video_id, db_path="video_data.db"):
     with sqlite3.connect(db_path) as con:
