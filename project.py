@@ -136,6 +136,8 @@ def top_comments(limit, video_id, db_path="video_data.db"):
     return results
 
 def word_frequency(limit, video_id, db_path="video_data.db"):
+    if limit < 1:
+        raise ValueError("Limit cannot be less than 1")
     with sqlite3.connect(db_path) as con:
         cur = con.cursor()
         res = cur.execute("SELECT comment FROM comments WHERE video_id = ?", (video_id,))
