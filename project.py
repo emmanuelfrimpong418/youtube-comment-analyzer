@@ -149,6 +149,8 @@ def word_frequency(limit, video_id, db_path="video_data.db"):
             if (word not in STOP_WORDS and word not in YOUTUBE_NOISE_WORDS and word not in CONTRACTIONS
                     and any(char.isalpha() for char in word)):
                 word_count[word] = word_count.get(word, 0) + 1
+    if not word_count:
+        raise ValueError("No words found!")
     sorted_words = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
     return dict(sorted_words[:limit])
 
