@@ -112,3 +112,11 @@ def test_word_frequency_valid(tmp_path):
     assert result1 == {"great": 3, "tutorial": 3, "think": 1, "amazing": 2}
     result2 = word_frequency(2, FAKE_WORD_VIDEO_ID, db_path=db_path)
     assert result2 == {"great": 3, "tutorial": 3}
+
+def test_word_frequency_invalid(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_WORD_COMMENTS, FAKE_WORD_VIDEO_ID, db_path=db_path)
+    with pytest.raises(ValueError):
+        word_frequency(-5, FAKE_WORD_VIDEO_ID, db_path=db_path)
+    with pytest.raises(ValueError):
+        word_frequency(0, FAKE_WORD_VIDEO_ID, db_path=db_path)
