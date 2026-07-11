@@ -128,3 +128,9 @@ def test_word_frequency_all_words_filtered(tmp_path):
                   db_path=db_path)
     with pytest.raises(ValueError):
         word_frequency(1, FAKE_WORD_VIDEO_ID, db_path=db_path)
+
+def test_word_frequency_no_comments(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments([], FAKE_WORD_VIDEO_ID, db_path=db_path)
+    with pytest.raises(ValueError):
+        word_frequency(1, FAKE_WORD_VIDEO_ID, db_path=db_path)
