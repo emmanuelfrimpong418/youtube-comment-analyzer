@@ -1,5 +1,5 @@
 import pytest
-from project import extract_video_id, save_comments, search_comments, top_comments, word_frequency
+from project import extract_video_id, save_comments, search_comments, top_comments, word_frequency, compute_stats
 
 FAKE_COMMENTS = [
     {"comment": "great tutorial. wonderful", "likes": 5, "author": "Alice"},
@@ -17,6 +17,14 @@ FAKE_WORD_COMMENTS = [
     {"comment": "Amazing amazing tutorial, thanks!", "likes": 1, "author": "Charlie"},
 ]
 FAKE_WORD_VIDEO_ID = "wF3xJ9k2Lmp"
+
+FAKE_STATS_COMMENTS = [
+    {"comment": "first amazing comment here", "likes": 8, "author": "Alice"},
+    {"comment": "second one is also amazing", "likes": 8, "author": "Bob"},
+    {"comment": "just okay", "likes": 3, "author": "Charlie"},
+    {"comment": "meh", "likes": 1, "author": "Dana"},
+]
+FAKE_STATS_VIDEO_ID = "sT4tsV1de0Id"
 
 def test_extract_video_id_valid():
     assert extract_video_id("https://youtu.be/8qQW4LTWgtc?si=CYSuulbV1hK6BpeS") == "8qQW4LTWgtc"
@@ -134,3 +142,15 @@ def test_word_frequency_no_comments(tmp_path):
     save_comments([], FAKE_WORD_VIDEO_ID, db_path=db_path)
     with pytest.raises(ValueError):
         word_frequency(1, FAKE_WORD_VIDEO_ID, db_path=db_path)
+
+def test_compute_stats_valid(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_STATS_COMMENTS, FAKE_STATS_VIDEO_ID, db_path=db_path)
+    result1 = compute_stats(FAKE_STATS_VIDEO_ID, db_path=db_path)
+    assert result1 == {
+    "comments_analyzed": 4,
+    "total_likes": 20,
+    "average_likes": 5.0,
+    "average_comment_length": 3.0,
+    "most_liked_comment": ("first amazing comment here", 8, "Alice")
+}
