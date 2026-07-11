@@ -154,3 +154,10 @@ def test_compute_stats_valid(tmp_path):
     "average_comment_length": 3.0,
     "most_liked_comment": ("first amazing comment here", 8, "Alice")
 }
+
+def test_compute_stats_tie_breaking(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_STATS_COMMENTS, FAKE_STATS_VIDEO_ID, db_path=db_path)
+    result = compute_stats(FAKE_STATS_VIDEO_ID, db_path=db_path)
+    assert result["most_liked_comment"] == ("first amazing comment here", 8, "Alice")
+
