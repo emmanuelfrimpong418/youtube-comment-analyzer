@@ -158,18 +158,19 @@ def word_frequency(limit, video_id, db_path="video_data.db"):
 def compute_stats(video_id, db_path="video_data.db"):
     with sqlite3.connect(db_path) as con:
         cur = con.cursor()
-        res = cur.execute("SELECT comment, likes, author FROM comments WHERE video_id = ? ORDER BY likes DESC",
-                          (video_id,))
+        res = cur.execute("SELECT comment, likes, author FROM comments WHERE video_id = ?",(video_id,))
         results = res.fetchall()
     if not results:
         raise ValueError("No comments found!")
     comments_analyzed = len(results)
-    most_liked_comment = results[0]
+    most_liked_comment = None
     total_likes = 0
     total_comment_length = 0
     for result in results:
         total_likes += result[1]
         total_comment_length += len(result[0].split())
+        if most_liked_comment is None or result[1] > most_liked_comment[1]:
+            most_liked_comment = result
     average_likes = total_likes/comments_analyzed
     average_comment_length = total_comment_length / comments_analyzed
     return {"comments_analyzed": comments_analyzed, "total_likes": total_likes, "average_likes": average_likes,
