@@ -174,3 +174,9 @@ def test_get_last_video_id_last_fetched_wins(tmp_path):
     save_comments(FAKE_STATS_COMMENTS, FAKE_STATS_VIDEO_ID, db_path=db_path)
     assert get_last_video_id(db_path=db_path) == FAKE_STATS_VIDEO_ID
 
+def test_get_last_video_id_refetch_bumps_video(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_COMMENTS, FAKE_VIDEO_ID, db_path=db_path)
+    save_comments(FAKE_STATS_COMMENTS, FAKE_STATS_VIDEO_ID, db_path=db_path)
+    save_comments(FAKE_COMMENTS, FAKE_VIDEO_ID, db_path=db_path)
+    assert get_last_video_id(db_path=db_path) == FAKE_VIDEO_ID
