@@ -1,5 +1,6 @@
 import pytest
 from project import extract_video_id, save_comments, search_comments, top_comments, word_frequency, compute_stats
+from project import get_last_video_id
 
 FAKE_COMMENTS = [
     {"comment": "great tutorial. wonderful", "likes": 5, "author": "Alice"},
@@ -166,3 +167,10 @@ def test_compute_stats_no_comments(tmp_path):
     save_comments([], FAKE_STATS_VIDEO_ID, db_path=db_path)
     with pytest.raises(ValueError):
         compute_stats(FAKE_STATS_VIDEO_ID, db_path=db_path)
+
+def test_get_last_video_id_last_fetched_wins(tmp_path):
+    db_path = tmp_path / "test.db"
+    save_comments(FAKE_COMMENTS, FAKE_VIDEO_ID, db_path=db_path)
+    save_comments(FAKE_STATS_COMMENTS, FAKE_STATS_VIDEO_ID, db_path=db_path)
+    assert get_last_video_id(db_path=db_path) == FAKE_STATS_VIDEO_ID
+
