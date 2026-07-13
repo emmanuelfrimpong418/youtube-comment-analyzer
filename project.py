@@ -46,14 +46,17 @@ def main():
             sys.exit(str(e))
     else:
         try:
+            video_id = get_last_video_id()
+            if video_id is None:
+                raise ValueError("No comments found for the current video. Fetch a video with comments first.")
             if args.command == "search":
-                display_comments(search_comments(args.keyword, get_last_video_id()))
+                display_comments(search_comments(args.keyword, video_id))
             elif args.command == "top":
-                display_comments(top_comments(args.limit, get_last_video_id()))
+                display_comments(top_comments(args.limit, video_id))
             elif args.command == "freq":
-                display_frequency(word_frequency(args.limit, get_last_video_id()))
+                display_frequency(word_frequency(args.limit, video_id))
             elif args.command == "stats":
-                display_stats(compute_stats(get_last_video_id()))
+                display_stats(compute_stats(video_id))
         except sqlite3.OperationalError:
             sys.exit("You need to call fetch first!")
         except ValueError as e:
