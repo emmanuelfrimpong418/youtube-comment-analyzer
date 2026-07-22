@@ -7,8 +7,14 @@ A command-line data analysis tool that converts YouTube comments into a searchab
 ### Fetching Comments
 ![Fetching comments](assets/fetch.png)
 
-### Analyzing Comments
-![Comment analysis output](assets/analysis.png)
+### Searching Comments
+![Comment analysis output](assets/search.png)
+
+### Top Comments
+![Comment search output](assets/top.png)
+
+### Word Frequency
+![Word Frequency output](assets/frequency.png)
 
 ### Generating Statistics
 ![Statistics output](assets/stats.png)
